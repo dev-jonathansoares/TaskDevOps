@@ -45,7 +45,7 @@ jobs:
           git checkout -B $TARGET_BRANCH
           git merge origin/main
           git config --global user.email "jonathan.soares91@outlook.com"
-          git config --global user.name "GitHub Actions"
+          git config --global user.name "dev-jonathansoares"
           git push --force --set-upstream origin $TARGET_BRANCH
 
   deploy_homologation:
