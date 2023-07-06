@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    
+jobs:
+
+  backup_theme_folder:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Create backup folder
+        run: |
+          mkdir -p wordpress_data/wp-content/themes/twentytwentyone_tmp
+          mkdir -p wordpress_data/wp-content/themes/twentytwentyone_old
+          cp -R wordpress_data/wp-content/themes/twentytwentyone wordpress_data/wp-content/themes/twentytwentyone_tmp
+          rsync wordpress_data/wp-content/themes/twentytwentyone wordpress_data/wp-content/themes/twentytwentyone_old
+          cp -R wordpress_data/wp-content/themes/twentytwentyone_tmp wordpress_data/wp-content/themes/twentytwentyone
+      - name: Commit and push backup changes
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git add wordpress_data/wp-content/themes/twentytwentyone_tmp
+          git add wordpress_data/wp-content/themes/twentytwentyone_old
+          git commit -m "Create backup of theme folder"
+          git push origin main
+          
+          
+  deploy_production:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      - name: Deploy to production
+        env:
+          TARGET_BRANCH: prod
+        run: |
+          echo "Deploying to production branch"
+          git checkout -B $TARGET_BRANCH
+          git merge origin/main
+          git config --global user.email "jonathan.soares91@outlook.com"
+          git config --global user.name "GitHub Actions"
+          git push --force --set-upstream origin $TARGET_BRANCH
+
+  deploy_homologation:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      - name: Deploy to homologation
+        env:
+          TARGET_BRANCH: homolog
+        run: |
+          echo "Deploying to homologation branch"
+          git checkout -B $TARGET_BRANCH
+          git merge origin/main
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git push --force --set-upstream origin $TARGET_BRANCH
